@@ -1,11 +1,11 @@
 Software System for Gathering and Analyzing Online Opinions about Events
 ========================================================================
 
-Architecture
+## Architecture
 ------------
 ![plot](./images/opinion_search_engine_PSA_v.0.1.png)
 
-Requirements
+## Requirements
 ------------
 conda install -c anaconda beautifulsoup4
 conda install -c anaconda nltk
@@ -14,7 +14,7 @@ conda install -c anaconda nltk
   >>> nltk.download('stopwords')
 conda install -c anaconda lxml
 
-Repository File structure
+## Repository File structure
 -------------------------
 .
 ├── env_config

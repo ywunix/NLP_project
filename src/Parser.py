@@ -1,26 +1,61 @@
+import requests
+import string
+from bs4 import BeautifulSoup
+from nltk import word_tokenize
+from nltk.corpus import stopwords
 
 class Parser(object):
-    def __init__():
+    def __init__(self, req):
+        self.soup = BeautifulSoup(req.text, "lxml")
 
+    def html_reformat(self):
+        '''
+        Extract words from html format
+        '''
+        soup = self.soup
+        self.content = soup.get_text(separator='\n')
 
+    def text_modify(self):
+        # split into words
+        tokens = word_tokenize(self.content.lower())
+        table = str.maketrans('', '', string.punctuation)
+        stripped = [w.translate(table) for w in tokens]
+        # remove remaining tokens that are not alphabetic
+        words = [word for word in stripped if word.isalpha()]
+        # filter out stop words
+        stop_words = set(stopwords.words('english'))
+        words = [w for w in words if not w in stop_words]
+        self.token_text = words
 
+    def text_stem(self):
+        # Stemming the words to root form
+        from nltk.stem.porter import PorterStemmer
+        porter = PorterStemmer()
+        self.stem_text = [porter.stem(word) for word in self.token_text]
 
+    def text_process(self):
+        self.html_reformat()
+        self.text_modify()
+        self.text_stem()
+
+    def get_text(self, text_type="stem"):
+        if text_type == "html":
+            return self.soup.prettify()
+        elif text_type == "post_html":
+            return self.content
+        elif text_type == "token":
+            return self.token_text
+        elif text_type == "stem":
+            return self.stem_text
+        else:
+            return None
 
 if __name__ == "__main__":
-    data = Dataset("tags-universal.txt", "brown-universal.txt", train_test_split=0.8)
-    print("There are {} sentences in the corpus.".format(len(data)))
-    print("There are {} sentences in the training set.".format(len(data.training_set)))
-    print("There are {} sentences in the testing set.".format(len(data.testing_set)))
-    assert len(data) == len(data.training_set) + len(data.testing_set), \
-       "The number of sentences in the training set + testing set should sum to the number of sentences in the corpus"
-
-    print("There are a total of {} samples of {} unique words in the corpus."
-	  .format(data.N, len(data.vocab)))
-    print("There are {} samples of {} unique words in the training set."
-	  .format(data.training_set.N, len(data.training_set.vocab)))
-    print("There are {} samples of {} unique words in the testing set."
-	  .format(data.testing_set.N, len(data.testing_set.vocab)))
-    print("There are {} words in the test set that are missing in the training set."
-	  .format(len(data.testing_set.vocab - data.training_set.vocab)))
-    assert data.N == data.training_set.N + data.testing_set.N, \
-	   "The number of training + test samples should sum to the total number of samples"
+    # url = "https://greatergood.berkeley.edu/article/item/how_to_become_a_friend_to_yourself?utm_source=pocket-newtab"
+    url = "https://www.nytimes.com/2021/02/06/business/economy/housing-insecurity.html?action=click&module=Spotlight&pgtype=Homepage"
+    req = requests.get(url)
+    html_content = req.text
+    parser = Parser(req)
+    parser.text_process()
+    text = parser.get_text('token')
+    print(text)

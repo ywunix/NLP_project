@@ -1,5 +1,7 @@
 from keras.layers.embeddings import Embedding
 from keras.preprocessing.text import Tokenizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk
 
 class TF_IDF(object):
     def __init__(self, words=None, vocab_size=100000):
@@ -31,3 +33,13 @@ if __name__ == "__main__":
     tokens = tfidf.convert_word2index(text_tokens)
     print(tokens)
     print(tfidf.tokenizer.word_index)
+
+    count_vectorizer = TfidfVectorizer(ngram_range=(1,1), max_df=0.65,
+                        tokenizer=nltk.word_tokenize,
+                        strip_accents='unicode',
+                        lowercase =True, analyzer='word', token_pattern=r'\w+',
+                        use_idf=True, smooth_idf=True, sublinear_tf=False, 
+                        stop_words = 'english')
+    bag_of_words = count_vectorizer.fit_transform(text_tokens)
+    print(bag_of_words)
+
